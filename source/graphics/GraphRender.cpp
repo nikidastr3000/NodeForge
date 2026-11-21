@@ -57,7 +57,15 @@ void GraphRender::renderEdges(sf::RenderWindow &window) const {
 }
 
 void GraphRender::renderEdge(const math::common::Edge& edge, sf::RenderWindow& window) const {
+    const NodeVisual& fromNode = visualNodes.at(edge.fromId);
+    const NodeVisual& toNode = visualNodes.at(edge.toId);
 
+    sf::Vertex line[] = {
+        sf::Vertex(sf::Vector2f(fromNode.x, fromNode.y), DEFAULT_EDGE_COLOR),
+        sf::Vertex(sf::Vector2f(toNode.x, toNode.y), DEFAULT_EDGE_COLOR)
+    };
+
+    window.draw(line, 2, sf::Lines);
 }
 
 

@@ -16,6 +16,8 @@ private:
 
 public:
     int addNode();
+    void addEdge(int fromId, int toId);
+
     std::vector<math::common::Edge> getEdges() const override;
     std::vector<math::common::NodeValue> getNodes() const override;
     void rebuild(const std::vector<math::common::NodeValue>& nodes, const std::vector<math::common::Edge>& edges);

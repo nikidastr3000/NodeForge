@@ -13,15 +13,17 @@ int main() {
 
     int id;
     id = graph.addNode();
-    graphRender.addNodeVisual(id, 0, 0);
+    graphRender.addNodeVisual(id, 100, 100);
 
     id = graph.addNode();
     graphRender.addNodeVisual(id, 30, 30);
 
     id = graph.addNode();
-    graphRender.addNodeVisual(id, 500, 30);
+    graphRender.addNodeVisual(id, 200, 30);
 
-
+    graph.addEdge(0, 1);
+    graph.addEdge(1, 2);
+    graph.addEdge(2, 0);
 
 
     sf::RenderWindow window(

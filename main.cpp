@@ -1,14 +1,14 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-#include "source/graphics/GraphRender.hpp"
+#include "graphics/GraphRender.hpp"
 #include "math/graph/Graph.hpp"
 
 using namespace std;
 
 int main() {
-    math::graph::Graph graph = math::graph::Graph();
-    graphics::GraphRender graphRender = graphics::GraphRender();
+    math::graph::Graph graph;
+    graphics::GraphRender graphRender;
     graphRender.setDrawableStructure(&graph);
 
     int id;
@@ -21,7 +21,7 @@ int main() {
     id = graph.addNode();
     graphRender.addNodeVisual(id, 500, 30);
 
-    
+
 
 
     sf::RenderWindow window(

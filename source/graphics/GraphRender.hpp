@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <unordered_map>
 
 #include "graphics/NodeVisual.hpp"
 #include "math/common/Edge.hpp"
@@ -17,7 +17,7 @@ namespace graphics {
 
 class GraphRender {
 private:
-    std::vector<NodeVisual> visuals;
+    std::unordered_map<int, NodeVisual> visualNodes;
     const math::common::IDrawableStructure* drawableStructure = nullptr;
 
 public:
@@ -32,14 +32,14 @@ public:
     // TODO: Расхождение с Sequence Diagram (шаг 18): вызывается `getNode(x, y)` с возвратом id,
     // но метод отсутствует на Class Diagram. Требуется уточнить сигнатуру и добавить в диаграмму классов.
 
-    void render(sf::RenderWindow& window);
+    void render(sf::RenderWindow& window) const;
 
 private:
-    void renderNodes(sf::RenderWindow& window);
-    void renderNode(const graphics::NodeVisual& node, sf::RenderWindow& window);
+    void renderNodes(sf::RenderWindow& window) const;
+    void renderNode(const graphics::NodeVisual& node, sf::RenderWindow& window) const;
 
-    void renderEdges(sf::RenderWindow &window);
-    void renderEdge(const math::common::Edge& edge, sf::RenderWindow& window);
+    void renderEdges(sf::RenderWindow &window) const;
+    void renderEdge(const math::common::Edge& edge, sf::RenderWindow& window) const;
 
 };
 

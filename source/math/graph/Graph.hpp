@@ -11,8 +11,8 @@ namespace math::graph {
 
 class Graph : public math::common::IDrawableStructure {
 private:
-    std::vector<Node> nodes;
-    int nextId;
+    std::vector<Node> nodes = {};
+    int nextId = 0;
 
 public:
     int addNode();
@@ -26,10 +26,7 @@ public:
     // TODO: Расхождение с Sequence Diagram (шаг 19): вызывается `delNode(id)`,
     // но метод отсутствует на Class Diagram. Требуется уточнить сигнатуру и добавить в диаграмму классов.
 
-    Graph() {
-        nodes = std::vector<Node>();
-        nextId = 0;
-    }
+    Graph() = default;
 };
 
 } // namespace math::graph

@@ -6,13 +6,15 @@ int Graph::addNode() {
     for (Node& node: nodes) {
         if (node.isAlive == false) {
             node.isAlive = true;
+            node.value = node.id;
+            node.neighbours.clear();
             return node.id;
         }
     }
 
     int newId = nextId++;
-    nodes.emplace_back(newId, 0);
-    return newId++;
+    nodes.emplace_back(newId, newId);
+    return newId;
 }
 
 std::vector<math::common::Edge> Graph::getEdges() const {
@@ -21,8 +23,16 @@ std::vector<math::common::Edge> Graph::getEdges() const {
 }
 
 std::vector<math::common::NodeValue> Graph::getNodes() const {
-    // TODO: Вернуть список вершин графа (id и value) в формате std::vector<NodeValue> для реализации IDrawableStructure.
-    return {}; // TODO
+    std::vector<math::common::NodeValue> valueNodes = {};
+    valueNodes.reserve(nodes.size());
+    
+    for (const Node& graphNode: this->nodes) {
+        if (graphNode.isAlive) {
+            valueNodes.emplace_back(graphNode.id, graphNode.value);
+        }
+    }
+
+    return valueNodes;
 }
 
 void Graph::rebuild(const std::vector<math::common::NodeValue>& /*nodes*/,

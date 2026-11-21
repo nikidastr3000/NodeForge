@@ -18,7 +18,6 @@ add_executable(NodeForge
     source/math/trees/BinaryTreeNode.cpp
     source/math/trees/Tree.cpp
     source/math/trees/TreeNode.cpp
-        source/math/common/Constants.hpp
 
 )
 

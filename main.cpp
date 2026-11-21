@@ -1,10 +1,27 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+#include "source/graphics/GraphRender.hpp"
+#include "math/graph/Graph.hpp"
+
 using namespace std;
 
 int main() {
+    math::graph::Graph graph = math::graph::Graph();
+    graphics::GraphRender graphRender = graphics::GraphRender();
+    graphRender.setDrawableStructure(&graph);
 
+    int id;
+    id = graph.addNode();
+    graphRender.addNodeVisual(id, 0, 0);
+
+    id = graph.addNode();
+    graphRender.addNodeVisual(id, 30, 30);
+
+    id = graph.addNode();
+    graphRender.addNodeVisual(id, 500, 30);
+
+    
 
 
     sf::RenderWindow window(
@@ -12,9 +29,9 @@ int main() {
         "SFML Window"
     );
 
-    sf::CircleShape circle(50.f);
+    /*sf::CircleShape circle(50.f);
     circle.setFillColor(sf::Color::Green);
-    circle.setPosition(0.f, 0.f);
+    circle.setPosition(0.f, 0.f);*/
 
     while (window.isOpen()) {
         sf::Event event{};
@@ -25,10 +42,10 @@ int main() {
             }
         }
 
-        window.clear(sf::Color::Black);
+        window.clear(sf::Color::White);
 
         // draw objects here
-        window.draw(circle);
+        graphRender.render(window);
 
         window.display();
     }

@@ -3,6 +3,11 @@
 #include <vector>
 
 #include "graphics/NodeVisual.hpp"
+#include "math/common/Edge.hpp"
+
+namespace sf {
+    class RenderWindow;
+}
 
 namespace math::common {
 class IDrawableStructure;
@@ -13,7 +18,7 @@ namespace graphics {
 class GraphRender {
 private:
     std::vector<NodeVisual> visuals;
-    const math::common::IDrawableStructure* structure = nullptr;
+    const math::common::IDrawableStructure* drawableStructure = nullptr;
 
 public:
     // TODO: Расхождение с Sequence Diagram (шаг 11): вызывается `addNodeVisual(id)` с 1 аргументом,
@@ -26,6 +31,16 @@ public:
 
     // TODO: Расхождение с Sequence Diagram (шаг 18): вызывается `getNode(x, y)` с возвратом id,
     // но метод отсутствует на Class Diagram. Требуется уточнить сигнатуру и добавить в диаграмму классов.
+
+    void render(sf::RenderWindow& window);
+
+private:
+    void renderNodes(sf::RenderWindow& window);
+    void renderNode(const graphics::NodeVisual& node, sf::RenderWindow& window);
+
+    void renderEdges(sf::RenderWindow &window);
+    void renderEdge(const math::common::Edge& edge, sf::RenderWindow& window);
+
 };
 
 } // namespace graphics

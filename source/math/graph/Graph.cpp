@@ -33,6 +33,15 @@ void Graph::addEdge(int fromId, int toId) {
     nodes[toId].neighbours.emplace_back(fromId);    //delete this line, if the graph is directed
 }
 
+void Graph::removeNode(int id) {
+    for (int neighbourId: nodes[id].neighbours) {
+        std::erase(nodes[neighbourId].neighbours, id);
+    }
+    nodes[id].isAlive = false;
+    nodes[id].neighbours.clear();
+    nodes[id].value = 0;
+}
+
 
 std::vector<math::common::Edge> Graph::getEdges() const {
     std::vector<math::common::Edge> edges;

@@ -16,6 +16,15 @@ void GraphRender::addNodeVisual(int id, float x, float y) {
     visualNodes[id] = NodeVisual(x, y, DEFAULT_NODE_RADIUS);
 }
 
+void GraphRender::removeNodeVisual(int id) {
+    assert(id >= 0 && "Node id cannot be negative");
+
+    auto iterator = visualNodes.find(id);
+    assert(iterator != visualNodes.end() && "Missing visual node for this id");
+
+    visualNodes.erase(id);
+}
+
 void GraphRender::setDrawableStructure(const math::common::IDrawableStructure* newStructure) {
     this->drawableStructure = newStructure;
 }
@@ -32,11 +41,11 @@ void GraphRender::renderNodes(sf::RenderWindow& window) const {
     std::vector<math::common::NodeValue> nodes = drawableStructure->getNodes();
     for (const math::common::NodeValue& node: nodes) {
         assert(node.id >= 0 && "Node id cannot be negative");
-        auto it = visualNodes.find(node.id);
-        assert(it != visualNodes.end() && "Missing visual node for graph node");
-        if (it != visualNodes.end()) {
-            renderNode(it->second, window); //TODO: add a node value as parameter
-        }
+
+        auto iterator = visualNodes.find(node.id);
+        assert(iterator != visualNodes.end() && "Missing visual node for this id");
+
+        renderNode(iterator->second, window); //TODO: add a node value as parameter
     }
 }
 

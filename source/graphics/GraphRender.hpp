@@ -25,8 +25,8 @@ public:
     // тогда как на Class Diagram объявлена только сигнатура `addNodeVisual(int, float, float)`.
     void addNodeVisual(int id, float x, float y);
 
-    // TODO: На Class Diagram в типе параметра допущена опечатка `const IDrawableStrucrue*` (исправлено на `const IDrawableStructure*`).
-    // TODO: Расхождение с Sequence Diagram (шаг 16): вызывается `setNewDrawableStructure(graph)` вместо `setDrawableStructure(...)`.
+    void removeNodeVisual(int id);
+
     void setDrawableStructure(const math::common::IDrawableStructure* structure);
 
     // TODO: Расхождение с Sequence Diagram (шаг 18): вызывается `getNode(x, y)` с возвратом id,

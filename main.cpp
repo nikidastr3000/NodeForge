@@ -26,6 +26,14 @@ int main() {
     graph.addEdge(2, 0);
 
 
+    graph.removeNode(0);
+    graphRender.removeNodeVisual(0);
+
+    graph.removeNode(1);
+    graphRender.removeNodeVisual(1);
+
+
+
     sf::RenderWindow window(
         sf::VideoMode(800, 600),
         "SFML Window"

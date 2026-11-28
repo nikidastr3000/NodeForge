@@ -19,10 +19,14 @@ public:
     void addEdge(int fromId, int toId);
 
     void removeNode(int id);
+    void removeEdge(int fromId, int toId);
+
+    bool hasEdge(int fromId, int toId) const;
 
     std::vector<math::common::Edge> getEdges() const override;
     std::vector<math::common::NodeValue> getNodes() const override;
     void rebuild(const std::vector<math::common::NodeValue>& nodes, const std::vector<math::common::Edge>& edges);
+
 
     // TODO: Расхождение с Sequence Diagram (шаг 5): вызывается `checkForAVLTree()` с возвратом bool (`return true`),
     // но метод отсутствует на Class Diagram. Требуется уточнить сигнатуру и добавить в диаграмму классов.
@@ -31,6 +35,9 @@ public:
     // но метод отсутствует на Class Diagram. Требуется уточнить сигнатуру и добавить в диаграмму классов.
 
     Graph() = default;
+
+private:
+
 };
 
 } // namespace math::graph

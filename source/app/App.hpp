@@ -18,6 +18,12 @@ enum class AppMode {
     TreeAlgorithm
 };
 
+enum class InteractionState {
+    Idle,
+    DraggingNode,
+    CreatingEdge
+};
+
 class App {
 private:
     sf::RenderWindow window;
@@ -30,7 +36,19 @@ private:
     graphics::GraphRender graphRender;
 
     // Состояние интеракции пользователя на холсте
+    InteractionState interactionState = InteractionState::Idle;
     std::optional<int> selectedNodeId;
+    std::optional<int> interactionNodeId;
+    sf::Vector2f dragOffset;
+
+    //double click check
+    sf::Clock lastEmptyClickClock;
+    sf::Vector2i lastEmptyClickPixelPos;
+    bool hasPendingEmptyClick = false;
+
+    //editor settings
+    bool createNodeOnEdgeDrop = false;
+
     // TODO: Позже добавить hoveredNodeId, draggedNodeId и экземпляр активного дерева (например, AVLTree)
 
 public:

@@ -15,6 +15,10 @@ constexpr unsigned int DEFAULT_WINDOW_HEIGHT = 600;
 constexpr unsigned int DEFAULT_FPS_LIMIT = 60;
 
 constexpr float DEFAULT_CAMERA_SPEED = 300.f;    //in pixels/second
+
+constexpr float DOUBLE_CLICK_MAX_SECONDS = 0.35f;
+constexpr int DOUBLE_CLICK_MAX_DISTANCE_PX = 6;
+
 } // anonym namespace - the variables can be seen only in this file
 
 App::App()
@@ -151,6 +155,15 @@ void App::render() {
     window.clear(sf::Color::White);
 
     window.setView(canvasView);
+
+    if (interactionState == InteractionState::CreatingEdge && interactionNodeId.has_value()) {
+        const sf::Vector2f mouseWorldPos = window.mapPixelToCoords(
+            sf::Mouse::getPosition(window),
+            canvasView
+        );
+        graphRender.renderPreviewEdge(window, interactionNodeId.value(), mouseWorldPos);
+    }
+
     graphRender.render(window, selectedNodeId);
 
     window.setView(window.getDefaultView());
@@ -179,21 +192,155 @@ void App::updateCamera(sf::Time dt) {
 }
 
 
-void App::handleMouseButtonPressed(const sf::Event::MouseButtonEvent& /*mouseEvent*/) {
+void App::handleMouseButtonPressed(const sf::Event::MouseButtonEvent& mouseEvent) {
     // TODO: Перевести пиксели в мировые координаты через window.mapPixelToCoords(pixelPos, canvasView)
     // и обработать выбор/создание вершины или старт перетаскивания
+
+    sf::Vector2f mouseWorldPos = window.mapPixelToCoords(
+        sf::Vector2i(mouseEvent.x, mouseEvent.y),
+        canvasView
+    );
+    std::optional<int> hit = graphRender.getNodeAt(mouseWorldPos);
+
+    const bool isShiftPressed =
+    sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
+    sf::Keyboard::isKeyPressed(sf::Keyboard::RShift);
+
+    const bool isEdgeGesture =
+        (mouseEvent.button == sf::Mouse::Right) ||
+        (mouseEvent.button == sf::Mouse::Left && isShiftPressed);
+
+    if (isEdgeGesture) {
+        hasPendingEmptyClick = false;
+
+        if (mode == AppMode::GraphEdit && hit.has_value()) {
+            interactionState = InteractionState::CreatingEdge;
+            interactionNodeId = hit;
+        }
+        return;
+    }
+
+    if (mouseEvent.button == sf::Mouse::Left) {
+        if (hit.has_value()) {
+            selectedNodeId = hit;
+            interactionNodeId = hit;
+            interactionState = InteractionState::DraggingNode;
+            dragOffset = graphRender.getNodePosition(hit.value()) - mouseWorldPos;
+
+            hasPendingEmptyClick = false;
+        } else {
+            interactionState = InteractionState::Idle;
+            selectedNodeId = std::nullopt;
+            interactionNodeId = std::nullopt;
+
+            const sf::Vector2i clickPixelPos(mouseEvent.x, mouseEvent.y);
+            const int dx = clickPixelPos.x - lastEmptyClickPixelPos.x;
+            const int dy = clickPixelPos.y - lastEmptyClickPixelPos.y;
+
+            const bool isCloseEnough =
+                (dx * dx + dy * dy) <= (DOUBLE_CLICK_MAX_DISTANCE_PX * DOUBLE_CLICK_MAX_DISTANCE_PX);
+            const bool isFastEnough =
+                lastEmptyClickClock.getElapsedTime().asSeconds() <= DOUBLE_CLICK_MAX_SECONDS;
+
+            if (hasPendingEmptyClick && isCloseEnough && isFastEnough && mode == AppMode::GraphEdit) {
+                const int newId = graph.addNode();
+                graphRender.addNodeVisual(newId, mouseWorldPos.x, mouseWorldPos.y);
+                selectedNodeId = newId;
+                hasPendingEmptyClick = false;
+            }
+            else {
+                lastEmptyClickPixelPos = clickPixelPos;
+                lastEmptyClickClock.restart();
+                hasPendingEmptyClick = (mode == AppMode::GraphEdit);
+            }
+        }
+    }
+
+
 }
 
-void App::handleMouseButtonReleased(const sf::Event::MouseButtonEvent& /*mouseEvent*/) {
+void App::handleMouseButtonReleased(const sf::Event::MouseButtonEvent& mouseEvent) {
     // TODO: Сбросить состояние перетаскивания вершины / панорамирования камеры
+
+    if (interactionState == InteractionState::DraggingNode && mouseEvent.button == sf::Mouse::Left) {
+        interactionState = InteractionState::Idle;
+        interactionNodeId = std::nullopt;
+    }
+
+    if (interactionState == InteractionState::CreatingEdge &&
+        (mouseEvent.button == sf::Mouse::Right || mouseEvent.button == sf::Mouse::Left)) {
+        if (interactionNodeId.has_value() && !ImGui::GetIO().WantCaptureMouse) {
+            const sf::Vector2f mouseWorldPos = window.mapPixelToCoords(
+                sf::Vector2i(mouseEvent.x, mouseEvent.y),
+                canvasView
+            );
+
+            const int fromId = *interactionNodeId;
+            const std::optional<int> targetId = graphRender.getNodeAt(mouseWorldPos);
+
+            if (targetId.has_value()) {
+                // Исход 1: отпустили на ДРУГОЙ вершине -> toggle ребра
+                if (*targetId != fromId) {
+                    if (graph.hasEdge(fromId, *targetId)) {
+                        graph.removeEdge(fromId, *targetId);
+                    } else {
+                        graph.addEdge(fromId, *targetId);
+                    }
+                }
+                // Исход 2: отпустили на той же вершине (*targetId == fromId) -> ничего не делаем (отмена)
+            } else if (createNodeOnEdgeDrop) {
+                // Исход 3 (бонус для быстрой сборки деревьев):
+                // отпустили на пустом месте -> создаём новую вершину и сразу соединяем
+                const int newId = graph.addNode();
+                graphRender.addNodeVisual(newId, mouseWorldPos.x, mouseWorldPos.y);
+                graph.addEdge(fromId, newId);
+                selectedNodeId = newId;
+            }
+        }
+
+        interactionState = InteractionState::Idle;
+        interactionNodeId = std::nullopt;
+    }
+
 }
 
-void App::handleMouseMoved(const sf::Event::MouseMoveEvent& /*mouseEvent*/) {
+void App::handleMouseMoved(const sf::Event::MouseMoveEvent& mouseEvent) {
     // TODO: Обновить hover и координаты перетаскиваемой вершины / камеры
+
+    sf::Vector2f mouseWorldPos = window.mapPixelToCoords(
+        sf::Vector2i(mouseEvent.x, mouseEvent.y),
+        canvasView
+    );
+
+    if (interactionState == InteractionState::DraggingNode && interactionNodeId.has_value()) {
+        sf::Vector2f newPos = mouseWorldPos + dragOffset;
+        graphRender.setNodePosition(interactionNodeId.value(), newPos.x, newPos.y);
+    }
 }
 
-void App::handleKeyPressed(const sf::Event::KeyEvent& /*keyEvent*/) {
+void App::handleKeyPressed(const sf::Event::KeyEvent& keyEvent) {
     // TODO: Горячие клавиши холста (например, удаление выбранной вершины по Delete/BackSpace)
+
+    if (keyEvent.code == sf::Keyboard::Delete || keyEvent.code == sf::Keyboard::BackSpace) {
+        if (!selectedNodeId.has_value() || mode != AppMode::GraphEdit) {
+            return;
+        }
+
+        const int idToDelete= *selectedNodeId;
+        graph.removeNode(idToDelete);
+        graphRender.removeNodeVisual(idToDelete);
+        selectedNodeId = std::nullopt;
+
+        if (interactionNodeId == idToDelete) {
+            interactionState = InteractionState::Idle;
+            interactionNodeId = std::nullopt;
+        }
+    }
+
+    if (keyEvent.code == sf::Keyboard::Escape && interactionState == InteractionState::CreatingEdge) {
+        interactionState = InteractionState::Idle;
+        interactionNodeId = std::nullopt;
+    }
 }
 
 } // namespace app

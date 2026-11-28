@@ -29,17 +29,59 @@ void Graph::addEdge(int fromId, int toId) {
     assert(nodes[fromId].isAlive && "the node(fromId) has to be alive");
     assert(nodes[toId].isAlive && "the node(toId) has to be alive");
 
+    assert(fromId != toId && "loops are not allowed");
+    assert(!hasEdge(fromId, toId) && "edge already exists");
+
     nodes[fromId].neighbours.emplace_back(toId);
     nodes[toId].neighbours.emplace_back(fromId);    //delete this line, if the graph is directed
 }
 
 void Graph::removeNode(int id) {
+    assert(id >= 0 && "id cannot be negative");
+    assert(id < nodes.size() && "id has to be in the range");
+    assert(nodes[id].isAlive && "the node has to be alive");
+
+
     for (int neighbourId: nodes[id].neighbours) {
         std::erase(nodes[neighbourId].neighbours, id);
     }
     nodes[id].isAlive = false;
     nodes[id].neighbours.clear();
     nodes[id].value = 0;
+}
+
+void Graph::removeEdge(int fromId, int toId) {
+    assert(fromId >= 0 && "fromId cannot be negative");
+    assert(toId >= 0 && "toId cannot be negative");
+
+    assert(fromId < nodes.size() && "fromId has to be in the range");
+    assert(toId < nodes.size() && "toId has to be in the range");
+
+    assert(nodes[fromId].isAlive && "the node(fromId) has to be alive");
+    assert(nodes[toId].isAlive && "the node(toId) has to be alive");
+
+    assert(hasEdge(fromId, toId) && "edge has to exist");
+
+    std::erase(nodes[fromId].neighbours, toId);
+    std::erase(nodes[toId].neighbours, fromId);     //delete this line, if the graph is directed
+}
+
+bool Graph::hasEdge(int fromId, int toId) const {
+    assert(fromId >= 0 && "fromId cannot be negative");
+    assert(toId >= 0 && "toId cannot be negative");
+
+    assert(fromId < nodes.size() && "fromId has to be in the range");
+    assert(toId < nodes.size() && "toId has to be in the range");
+
+    assert(nodes[fromId].isAlive && "the node(fromId) has to be alive");
+    assert(nodes[toId].isAlive && "the node(toId) has to be alive");
+
+    for (int neighbour: nodes[fromId].neighbours) {
+        if (neighbour == toId)
+            return true;
+    }
+
+    return false;
 }
 
 

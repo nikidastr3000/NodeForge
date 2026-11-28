@@ -1,12 +1,13 @@
 #pragma once
 
+#include <optional>
 #include <unordered_map>
 
 #include "graphics/NodeVisual.hpp"
 #include "math/common/Edge.hpp"
 
 namespace sf {
-    class RenderWindow;
+    class RenderTarget;
 }
 
 namespace math::common {
@@ -32,14 +33,14 @@ public:
     // TODO: Расхождение с Sequence Diagram (шаг 18): вызывается `getNode(x, y)` с возвратом id,
     // но метод отсутствует на Class Diagram. Требуется уточнить сигнатуру и добавить в диаграмму классов.
 
-    void render(sf::RenderWindow& window) const;
+    void render(sf::RenderTarget& target, std::optional<int> selectedNodeId) const;
 
 private:
-    void renderNodes(sf::RenderWindow& window) const;
-    void renderNode(const graphics::NodeVisual& node, sf::RenderWindow& window) const;
+    void renderNodes(sf::RenderTarget& target, std::optional<int> selectedNodeId) const;
+    void renderNode(sf::RenderTarget& target, const graphics::NodeVisual& node, bool isSelected) const;
 
-    void renderEdges(sf::RenderWindow &window) const;
-    void renderEdge(const math::common::Edge& edge, sf::RenderWindow& window) const;
+    void renderEdges(sf::RenderTarget& target) const;
+    void renderEdge(const math::common::Edge& edge, sf::RenderTarget& target) const;
 
 };
 

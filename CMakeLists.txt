@@ -42,6 +42,7 @@ endif()
 
 add_executable(NodeForge
     main.cpp
+    source/app/App.cpp
     source/graphics/GraphRender.cpp
     source/graphics/NodeVisual.cpp
     source/math/graph/Graph.cpp
